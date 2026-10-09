@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "deploy": "netlify deploy --prod --dir=out"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,7 @@
     "typescript": "^7.0.2"
   },
   "devDependencies": {
+    "netlify-cli": "^27.12.0",
     "playwright": "^1.64.0"
   }
 }

@@ -84,3 +84,33 @@ python scripts/build-hero-assets.py path/to/intro.mp4
 - **Zero Fabrication:** Every metric, role, publication, and technology is strictly sourced from Yash Pallav Pathak's verified curriculum vitae and authenticated project portfolios.
 - **Pure Monochromatic Palette:** Off-white (`#f4f2ee`), crisp card backgrounds (`#ffffff`), and deep ink (`#0d0d0d`) typography. Brand logos maintain authentic colors with subtle brand-tint glows.
 - **Accessibility & Motion:** Full support for `prefers-reduced-motion`, semantic heading hierarchy, keyboard navigable cards and modals, and zero horizontal scroll overflow across viewports from 360 px to 1920 px.
+
+---
+
+## 6. Netlify Deployment
+
+The project is pre-configured with `netlify.toml` for zero-configuration, production-ready static deployment on Netlify.
+
+### Method 1: Continuous Deployment via GitHub (Recommended)
+1. Go to [app.netlify.com](https://app.netlify.com) and log in.
+2. Click **"Add new site"** → **"Import an existing project"**.
+3. Select **GitHub** and authorize repository access.
+4. Pick the repository: `Its-Yash/portfolio`.
+5. Netlify will auto-detect settings from `netlify.toml`:
+   - **Build command**: `npm run build`
+   - **Publish directory**: `out`
+   - **Node version**: `20`
+6. Click **"Deploy portfolio"**. Every push to `main` will automatically build and publish to your global CDN!
+
+### Method 2: Manual CLI Deployment
+```bash
+# 1. Authenticate with Netlify
+npx netlify login
+
+# 2. Build the optimized static package
+npm run build
+
+# 3. Deploy directly to production
+npx netlify deploy --prod --dir=out
+```
+
