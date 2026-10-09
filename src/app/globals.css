@@ -1,0 +1,276 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f4f2ee;
+  --background: #f4f2ee;
+  --card: #ffffff;
+  --ink: #0d0d0d;
+  --ink-2: #3a3a3a;
+  --mute: #77756f;
+  --faint: #a9a6a0;
+  --line: rgba(13, 13, 13, 0.1);
+  --soft: #e9e6e0;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: clamp(18px, 4vw, 64px);
+
+  --font-inter: var(--font-inter-tight, system-ui, -apple-system, sans-serif);
+  --font-serif: var(--font-instrument-serif, "Times New Roman", serif);
+  --font-mono: var(--font-jetbrains-mono, monospace);
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-inter);
+    scroll-behavior: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: clip;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+
+  a, button {
+    outline-color: var(--ink);
+    transition: all 0.3s var(--ease);
+  }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+  }
+}
+
+@layer components {
+  .section-container {
+    width: 100%;
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  .section-padding {
+    padding-top: clamp(96px, 14vh, 160px);
+    padding-bottom: clamp(96px, 14vh, 160px);
+  }
+
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-heading {
+    font-family: var(--font-inter);
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 2rem;
+  }
+
+  .heading-serif-accent {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--mute);
+    letter-spacing: normal;
+  }
+
+  .btn-pill-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 9999px;
+    background-color: var(--ink);
+    color: #ffffff;
+    font-family: var(--font-inter);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    transition: transform 0.25s var(--ease), background-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+
+  .btn-pill-primary:hover {
+    transform: translateY(-2px);
+    background-color: #262626;
+    box-shadow: 0 8px 24px rgba(13, 13, 13, 0.15);
+  }
+
+  .btn-pill-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 9999px;
+    background-color: transparent;
+    color: var(--ink);
+    font-family: var(--font-inter);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: transform 0.25s var(--ease), background-color 0.25s var(--ease), border-color 0.25s var(--ease);
+  }
+
+  .btn-pill-secondary:hover {
+    transform: translateY(-2px);
+    background-color: rgba(13, 13, 13, 0.04);
+    border-color: var(--ink);
+  }
+
+  .card-base {
+    background-color: var(--card);
+    border-radius: 28px;
+    border: 1px solid var(--line);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 4px 20px rgba(13, 13, 13, 0.03);
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+
+  .card-base:hover {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 20px 48px rgba(13, 13, 13, 0.08);
+  }
+
+  /* Reveal Animations */
+  .rv {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    transition-delay: calc(var(--i, 0) * 80ms);
+    will-change: opacity, transform;
+  }
+
+  .rv.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .rv-mask {
+    overflow: hidden;
+  }
+
+  .rv-mask > * {
+    transform: translateY(100%);
+    transition: transform 0.8s var(--ease);
+    transition-delay: calc(var(--i, 0) * 80ms);
+  }
+
+  .rv-mask.is-in > * {
+    transform: translateY(0);
+  }
+
+  /* Keyframes for components */
+  @keyframes ticker-vertical {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.85);
+      opacity: 0.4;
+    }
+    70% {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spin-slow {
+    animation: spin-slow 14s linear infinite;
+  }
+
+  /* Sleek custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(13, 13, 13, 0.15);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(13, 13, 13, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .rv {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .rv-mask > * {
+    transform: none !important;
+  }
+}

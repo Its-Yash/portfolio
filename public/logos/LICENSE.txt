@@ -1,0 +1,3 @@
+Brand logos and icons included in this directory:
+- Brand logos are trademarks of their respective owners (Devicon / Simple Icons, MIT Licensed).
+- Concept and platform vector icons are custom-crafted vector designs under MIT License.
