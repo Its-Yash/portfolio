@@ -7,6 +7,7 @@ import {
   DesignStyle,
   DesignCategory,
 } from "@/lib/design-styles";
+import { DesignLab3DCanvas } from "./DesignLab3DCanvas";
 
 export function DesignLab() {
   const [selectedStyleId, setSelectedStyleId] = useState<string>("claymorphism");
@@ -15,7 +16,30 @@ export function DesignLab() {
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [toggleActive, setToggleActive] = useState<boolean>(true);
   const [actionCount, setActionCount] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<"sculpt" | "card" | "split">("sculpt");
+  const [cardTilt, setCardTilt] = useState({ rotX: 0, rotY: 0, glareX: 50, glareY: 50 });
+  const cardRef = useRef<HTMLDivElement>(null);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mouse move handler for physical 3D card tilt & glare
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const normX = (x / rect.width - 0.5) * 2;
+    const normY = (y / rect.height - 0.5) * 2;
+    setCardTilt({
+      rotX: -normY * 12,
+      rotY: normX * 12,
+      glareX: (x / rect.width) * 100,
+      glareY: (y / rect.height) * 100,
+    });
+  };
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ rotX: 0, rotY: 0, glareX: 50, glareY: 50 });
+  };
 
   // Filtered styles by category
   const filteredStyles = useMemo(() => {
@@ -240,175 +264,269 @@ export function DesignLab() {
 
         {/* Main Interactive Stage: 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column (Cols 1-7): The Live Morphing Artifact Card */}
-          <div className="lg:col-span-7 flex flex-col">
-            <div className="mb-3 flex items-center justify-between font-mono text-xs text-[#77756f]">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#10b981]" />
-                <span>LIVE SYSTEM ARTIFACT</span>
-              </span>
-              <span>STATE: {activeStyle.name.toUpperCase()}</span>
-            </div>
+          {/* Left Column (Cols 1-7): The Live 3D / Component Stage */}
+          <div className="lg:col-span-7 flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-[#77756f]">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#10b981]" />
+                  <span className="font-semibold text-[#0d0d0d]">STUDIO VIEW</span>
+                </span>
+                <span className="text-[10px] text-[#77756f]/70">·</span>
+                <span className="text-[11px] uppercase tracking-wider">{activeStyle.name}</span>
+              </div>
 
-            {/* The Live Interactive Artifact Box */}
-            <div className="relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center p-4 sm:p-8 bg-[#eae7e1]/40 rounded-3xl border border-[#0d0d0d]/10 overflow-hidden">
-              {/* Background ambient lighting for surreal/ethereal modes */}
-              {activeStyle.id === "ethereal" && (
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 pointer-events-none flex items-center justify-center animate-pulse duration-1000"
+              {/* View Mode Switcher: 3D Sculpt / 3D Card / Dual */}
+              <div className="flex items-center p-0.5 rounded-full bg-white border border-[#0d0d0d]/15 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("sculpt")}
+                  className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all cursor-pointer ${
+                    viewMode === "sculpt"
+                      ? "bg-[#0d0d0d] text-[#f4f2ee] font-medium shadow-xs"
+                      : "text-[#77756f] hover:text-[#0d0d0d]"
+                  }`}
                 >
-                  <div className="w-[360px] h-[360px] rounded-full bg-white/70 blur-3xl" />
-                </div>
-              )}
-
-              {/* Dynamic Styled Component based on Active Style */}
-              <div
-                className={`relative w-full max-w-lg transition-all duration-300 p-6 sm:p-8 ${getCardContainerClasses(
-                  activeStyle.id
-                )}`}
-                style={getCardContainerStyles(activeStyle.id)}
-              >
-                {/* Washi Tape Strip for Scrapbook style */}
-                {activeStyle.id === "scrapbook" && (
-                  <div
-                    aria-hidden="true"
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#dedbd4]/80 shadow-xs border border-white/50 transform -rotate-1 pointer-events-none"
-                  />
-                )}
-
-                {/* Victorian Classical Corner Brackets */}
-                {activeStyle.id === "victorian" && (
-                  <>
-                    <span className="absolute top-2 left-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
-                      ⌜
-                    </span>
-                    <span className="absolute top-2 right-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
-                      ⌝
-                    </span>
-                    <span className="absolute bottom-2 left-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
-                      ⌞
-                    </span>
-                    <span className="absolute bottom-2 right-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
-                      ⌟
-                    </span>
-                  </>
-                )}
-
-                {/* Cyberpunk HUD Corner Cuts & Reticles */}
-                {(activeStyle.id === "cyberpunk" ||
-                  activeStyle.id === "cybercore") && (
-                  <div className="absolute top-2 right-3 font-mono text-[9px] text-[#0d0d0d]/50 tracking-widest pointer-events-none">
-                    [0x7F · 60FPS · OK]
-                  </div>
-                )}
-
-                {/* Card Header */}
-                <div className="flex items-start justify-between gap-4 mb-6 pb-4 border-b border-[#0d0d0d]/10">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#77756f]">
-                        {activeStyle.eraOrOrigin}
-                      </span>
-                      {activeStyle.id === "wabi-sabi" && (
-                        <span className="font-serif text-xs text-[#0d0d0d] border border-[#0d0d0d]/20 px-1 rounded-sm">
-                          侘寂
-                        </span>
-                      )}
-                    </div>
-                    <h3 className={`text-xl sm:text-2xl font-bold tracking-tight text-[#0d0d0d] mt-1 ${
-                      activeStyle.id === "editorial-design" || activeStyle.id === "luxury-typography"
-                        ? "font-serif italic font-normal text-3xl"
-                        : activeStyle.id === "cybercore" || activeStyle.id === "pixel-art"
-                        ? "font-mono"
-                        : "font-sans"
-                    }`}>
-                      Yash Pallav Pathak
-                    </h3>
-                    <p className="text-xs text-[#77756f] font-mono mt-0.5">
-                      Full Stack · AI/ML · DevSecOps
-                    </p>
-                  </div>
-
-                  {/* Interactive Toggle Switch */}
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="font-mono text-[9px] text-[#77756f]">
-                      STATE
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setToggleActive(!toggleActive)}
-                      aria-label="Toggle system state"
-                      className={`relative w-12 h-6 rounded-full transition-all cursor-pointer p-0.5 ${getToggleClasses(
-                        activeStyle.id,
-                        toggleActive
-                      )}`}
-                      style={getToggleStyles(activeStyle.id, toggleActive)}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-full transition-transform ${
-                          toggleActive ? "translate-x-6" : "translate-x-0"
-                        } ${getToggleThumbClasses(activeStyle.id, toggleActive)}`}
-                        style={getToggleThumbStyles(activeStyle.id, toggleActive)}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Key Metrics / System Telemetry */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                  <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
-                    <div className="font-mono text-[10px] text-[#77756f]">CGPA</div>
-                    <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">9.07</div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
-                    <div className="font-mono text-[10px] text-[#77756f]">SKILLS</div>
-                    <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">56</div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
-                    <div className="font-mono text-[10px] text-[#77756f]">RESEARCH</div>
-                    <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">IEEE</div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
-                    <div className="font-mono text-[10px] text-[#77756f]">PLATFORMS</div>
-                    <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">9+</div>
-                  </div>
-                </div>
-
-                {/* Progress Meter / Live Readout */}
-                <div className="mb-6 space-y-1.5">
-                  <div className="flex justify-between font-mono text-[10px] text-[#77756f]">
-                    <span>SYSTEM ARCHITECTURE READY</span>
-                    <span className="font-bold text-[#0d0d0d]">100% COMPILED</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-[#0d0d0d]/10 overflow-hidden">
-                    <div
-                      className="h-full bg-[#0d0d0d] rounded-full transition-all duration-500"
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                </div>
-
-                {/* Interactive Action Button with Style-Specific Tactile Feedback */}
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setActionCount((c) => c + 1)}
-                    className={`flex-1 py-3 px-4 font-mono text-xs font-semibold cursor-pointer transition-all flex items-center justify-between ${getButtonClasses(
-                      activeStyle.id
-                    )}`}
-                    style={getButtonStyles(activeStyle.id)}
-                  >
-                    <span>✦ Trigger Action ({actionCount})</span>
-                    <span>→</span>
-                  </button>
-
-                  <span className="font-mono text-[11px] text-[#77756f] px-2">
-                    {activeStyle.subtitle}
-                  </span>
-                </div>
+                  ✦ 3D Sculpt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("card")}
+                  className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all cursor-pointer ${
+                    viewMode === "card"
+                      ? "bg-[#0d0d0d] text-[#f4f2ee] font-medium shadow-xs"
+                      : "text-[#77756f] hover:text-[#0d0d0d]"
+                  }`}
+                >
+                  ❖ 3D Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("split")}
+                  className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all cursor-pointer ${
+                    viewMode === "split"
+                      ? "bg-[#0d0d0d] text-[#f4f2ee] font-medium shadow-xs"
+                      : "text-[#77756f] hover:text-[#0d0d0d]"
+                  }`}
+                >
+                  ◫ Dual
+                </button>
               </div>
             </div>
+
+            {/* 3D WebGL Canvas View */}
+            {(viewMode === "sculpt" || viewMode === "split") && (
+              <DesignLab3DCanvas
+                styleId={activeStyle.id}
+                styleName={activeStyle.name}
+                category={activeStyle.category}
+                className={viewMode === "split" ? "h-[360px] sm:h-[400px]" : ""}
+              />
+            )}
+
+            {/* 3D Spatial Interactive Card View */}
+            {(viewMode === "card" || viewMode === "split") && (
+              <div className="relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center p-4 sm:p-8 bg-[#eae7e1]/40 rounded-3xl border border-[#0d0d0d]/10 overflow-hidden">
+                {/* Background ambient lighting for ethereal mode */}
+                {activeStyle.id === "ethereal" && (
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none flex items-center justify-center animate-pulse duration-1000"
+                  >
+                    <div className="w-[360px] h-[360px] rounded-full bg-white/70 blur-3xl" />
+                  </div>
+                )}
+
+                {/* 3D Spatial Tilt Card with layered depth and specular sheen */}
+                <div
+                  ref={cardRef}
+                  onMouseMove={handleCardMouseMove}
+                  onMouseLeave={handleCardMouseLeave}
+                  className={`relative w-full max-w-lg p-6 sm:p-8 ${getCardContainerClasses(
+                    activeStyle.id
+                  )}`}
+                  style={{
+                    ...getCardContainerStyles(activeStyle.id),
+                    transform: `perspective(1000px) rotateX(${cardTilt.rotX}deg) rotateY(${cardTilt.rotY}deg) scale3d(1.01, 1.01, 1.01)`,
+                    transformStyle: "preserve-3d",
+                    transition: cardTilt.rotX === 0 ? "transform 0.4s ease-out" : "none",
+                  }}
+                >
+                  {/* Dynamic Specular Sheen Glare following cursor in 3D */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none rounded-[inherit] transition-opacity duration-300 z-30"
+                    style={{
+                      background: `radial-gradient(circle at ${cardTilt.glareX}% ${cardTilt.glareY}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`,
+                      opacity: cardTilt.rotX !== 0 ? 1 : 0,
+                    }}
+                  />
+
+                  {/* Washi Tape Strip for Scrapbook style */}
+                  {activeStyle.id === "scrapbook" && (
+                    <div
+                      aria-hidden="true"
+                      className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#dedbd4]/80 shadow-xs border border-white/50 transform -rotate-1 pointer-events-none"
+                    />
+                  )}
+
+                  {/* Victorian Classical Corner Brackets */}
+                  {activeStyle.id === "victorian" && (
+                    <>
+                      <span className="absolute top-2 left-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
+                        ⌜
+                      </span>
+                      <span className="absolute top-2 right-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
+                        ⌝
+                      </span>
+                      <span className="absolute bottom-2 left-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
+                        ⌞
+                      </span>
+                      <span className="absolute bottom-2 right-2 text-[#0d0d0d] font-serif text-base select-none pointer-events-none">
+                        ⌟
+                      </span>
+                    </>
+                  )}
+
+                  {/* Cyberpunk HUD Corner Cuts & Reticles */}
+                  {(activeStyle.id === "cyberpunk" ||
+                    activeStyle.id === "cybercore") && (
+                    <div className="absolute top-2 right-3 font-mono text-[9px] text-[#0d0d0d]/50 tracking-widest pointer-events-none">
+                      [0x7F · 60FPS · OK]
+                    </div>
+                  )}
+
+                  {/* Card Header (Z-Axis Depth Layer) */}
+                  <div
+                    className="flex items-start justify-between gap-4 mb-6 pb-4 border-b border-[#0d0d0d]/10"
+                    style={{ transform: "translateZ(26px)" }}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-[#77756f]">
+                          {activeStyle.eraOrOrigin}
+                        </span>
+                        {activeStyle.id === "wabi-sabi" && (
+                          <span className="font-serif text-xs text-[#0d0d0d] border border-[#0d0d0d]/20 px-1 rounded-sm">
+                            侘寂
+                          </span>
+                        )}
+                      </div>
+                      <h3
+                        className={`text-xl sm:text-2xl font-bold tracking-tight text-[#0d0d0d] mt-1 ${
+                          activeStyle.id === "editorial-design" ||
+                          activeStyle.id === "luxury-typography"
+                            ? "font-serif italic font-normal text-3xl"
+                            : activeStyle.id === "cybercore" ||
+                              activeStyle.id === "pixel-art"
+                            ? "font-mono"
+                            : "font-sans"
+                        }`}
+                      >
+                        Yash Pallav Pathak
+                      </h3>
+                      <p className="text-xs text-[#77756f] font-mono mt-0.5">
+                        Full Stack · AI/ML · DevSecOps
+                      </p>
+                    </div>
+
+                    {/* Interactive Toggle Switch */}
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="font-mono text-[9px] text-[#77756f]">
+                        STATE
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setToggleActive(!toggleActive)}
+                        aria-label="Toggle system state"
+                        className={`relative w-12 h-6 rounded-full transition-all cursor-pointer p-0.5 ${getToggleClasses(
+                          activeStyle.id,
+                          toggleActive
+                        )}`}
+                        style={getToggleStyles(activeStyle.id, toggleActive)}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full transition-transform ${
+                            toggleActive ? "translate-x-6" : "translate-x-0"
+                          } ${getToggleThumbClasses(activeStyle.id, toggleActive)}`}
+                          style={getToggleThumbStyles(activeStyle.id, toggleActive)}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Key Metrics / System Telemetry (Z-Axis Depth Layer) */}
+                  <div
+                    className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"
+                    style={{ transform: "translateZ(34px)" }}
+                  >
+                    <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
+                      <div className="font-mono text-[10px] text-[#77756f]">CGPA</div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">
+                        9.07
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
+                      <div className="font-mono text-[10px] text-[#77756f]">SKILLS</div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">
+                        56
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
+                      <div className="font-mono text-[10px] text-[#77756f]">RESEARCH</div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">
+                        IEEE
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-black/3 border border-[#0d0d0d]/5">
+                      <div className="font-mono text-[10px] text-[#77756f]">PLATFORMS</div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-[#0d0d0d]">
+                        9+
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Meter / Live Readout */}
+                  <div className="mb-6 space-y-1.5" style={{ transform: "translateZ(20px)" }}>
+                    <div className="flex justify-between font-mono text-[10px] text-[#77756f]">
+                      <span>SYSTEM ARCHITECTURE READY</span>
+                      <span className="font-bold text-[#0d0d0d]">100% COMPILED</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-[#0d0d0d]/10 overflow-hidden">
+                      <div
+                        className="h-full bg-[#0d0d0d] rounded-full transition-all duration-500"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Interactive Action Button with Style-Specific Tactile Feedback (Z-Axis Depth Layer) */}
+                  <div className="flex items-center gap-3" style={{ transform: "translateZ(42px)" }}>
+                    <button
+                      type="button"
+                      onClick={() => setActionCount((c) => c + 1)}
+                      className={`flex-1 py-3 px-4 font-mono text-xs font-semibold cursor-pointer transition-all flex items-center justify-between ${getButtonClasses(
+                        activeStyle.id
+                      )}`}
+                      style={getButtonStyles(activeStyle.id)}
+                    >
+                      <span>✦ Trigger Action ({actionCount})</span>
+                      <span>→</span>
+                    </button>
+
+                    <span className="font-mono text-[11px] text-[#77756f] px-2">
+                      {activeStyle.subtitle}
+                    </span>
+                  </div>
+
+                  {/* 3D Gyro Tilt Hint */}
+                  <div className="mt-4 pt-3 border-t border-[#0d0d0d]/5 flex items-center justify-between font-mono text-[10px] text-[#77756f]/70">
+                    <span>3D SPATIAL SURFACE</span>
+                    <span>Move cursor for parallax depth</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column (Cols 8-12): Style Tokens Inspector & CSS Copy */}
@@ -458,6 +576,12 @@ export function DesignLab() {
                   <span className="text-[#77756f]">Typography:</span>
                   <span className="text-[#0d0d0d] font-semibold truncate max-w-[200px]" title={activeStyle.keyTokens.typography}>
                     {activeStyle.keyTokens.typography}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-[#77756f]">3D WebGL Mesh:</span>
+                  <span className="text-[#0d0d0d] font-semibold truncate max-w-[200px]">
+                    Procedural {activeStyle.category} Sculpt
                   </span>
                 </div>
               </div>
