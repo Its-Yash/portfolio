@@ -118,10 +118,11 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "about", label: "About", index: "01" },
   { id: "skills", label: "Skills", index: "02" },
   { id: "work", label: "Work", index: "03" },
-  { id: "certifications", label: "Certifications", index: "04" },
-  { id: "experience", label: "Experience", index: "05" },
-  { id: "achievements", label: "Achievements", index: "06" },
-  { id: "contact", label: "Contact", index: "07" },
+  { id: "design-lab", label: "Design Lab", index: "04" },
+  { id: "certifications", label: "Certifications", index: "05" },
+  { id: "experience", label: "Experience", index: "06" },
+  { id: "achievements", label: "Achievements", index: "07" },
+  { id: "contact", label: "Contact", index: "08" },
 ];
 
 export const SKILL_ITEMS: SkillItem[] = [

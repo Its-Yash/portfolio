@@ -7,6 +7,7 @@ import { Hero } from "@/components/hero/Hero";
 import { About } from "@/components/sections/About";
 import { Skills } from "@/components/sections/Skills";
 import { Work } from "@/components/sections/Work";
+import { DesignLab } from "@/components/sections/DesignLab";
 import { Certifications } from "@/components/sections/Certifications";
 import { Experience } from "@/components/sections/Experience";
 import { Achievements } from "@/components/sections/Achievements";
@@ -42,12 +43,13 @@ export function App() {
         {/* Fixed Navigation */}
         <Navigation />
 
-        {/* Main Content Flow: Hero → About → Skills → Work → Certifications → Experience → Achievements → Contact */}
+        {/* Main Content Flow: Hero → About → Skills → Work → Design Lab → Certifications → Experience → Achievements → Contact */}
         <main id="main-content" role="main" className="relative">
           <Hero />
           <About />
           <Skills />
           <Work />
+          <DesignLab />
           <Certifications />
           <Experience />
           <Achievements />
